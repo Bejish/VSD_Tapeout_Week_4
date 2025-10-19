@@ -91,10 +91,6 @@ The **CMOS Inverter** is the most fundamental digital circuit, consisting of com
 
 **Standard Configuration:**
 
-<p align="center">
-  <img src="day3_inv_spice.png" alt="CMOS Inverter Netlist" width="85%">
-</p>
-
 ```spice
 *Model Description
 .param temp=27
@@ -172,8 +168,10 @@ Analyze how output voltage (Vout) responds to input voltage (Vin) variation from
 ### VTC Plot Results
 
 <p align="center">
-  <img src="day3_vtc_plot.png" alt="Voltage Transfer Characteristic" width="90%">
+  <img src="plot_4.png" alt="Voltage Transfer Characteristic" width="90%">
 </p>
+
+*Figure: Voltage Transfer Characteristic showing the relationship between input voltage (Vin) and output voltage (Vout). The curve demonstrates the inverter's sharp transition region around Vm ≈ 0.9V.*
 
 ### VTC Curve Analysis
 
@@ -334,8 +332,10 @@ Vin in 0 PULSE(0V 1.8V 0ns 0.1ns 0.1ns 2ns 4ns)
 ### Transient Waveform Results
 
 <p align="center">
-  <img src="day3_tran_plot.png" alt="Transient Analysis Waveform" width="90%">
+  <img src="plot_3.png" alt="Transient Analysis Waveform" width="90%">
 </p>
+
+*Figure: Transient analysis showing input pulse (blue) and inverted output response (red). The waveform clearly demonstrates the inverter's switching behavior over multiple clock cycles.*
 
 ### Switching Characteristics
 
@@ -557,7 +557,7 @@ Tests inverter at VDD = 0.8V, 1.0V, 1.2V, 1.4V, 1.6V, 1.8V
 ### Sizing Study Configuration
 
 <p align="center">
-  <img src="da31.png" alt="Different Sizing Netlist" width="85%">
+  <img src="day3_sizing_spice.png" alt="Different Sizing Netlist" width="85%">
 </p>
 
 ### Parametric Sizing Study
@@ -573,7 +573,7 @@ Tests inverter at VDD = 0.8V, 1.0V, 1.2V, 1.4V, 1.6V, 1.8V
 ### Impact on Switching Threshold
 
 <p align="center">
-  <img src="day32.png" alt="VTC with Different Sizing" width="90%">
+  <img src="day3_sizing_vtc.png" alt="VTC with Different Sizing" width="90%">
 </p>
 
 #### Vm vs Wp/Wn Ratio
