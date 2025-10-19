@@ -1,752 +1,319 @@
-# 🔄 Day 3: CMOS Inverter Analysis
+# 🌟 Day 3 — CMOS Inverter Analysis: Unleashing the Power of Complementary Design! ⚡
 
-## Complete Characterization of the Digital Logic Building Block
 
----
 
-<div align="center">
+## 📋 Contents
 
-```
-╔════════════════════════════════════════════════════════════╗
-║                                                            ║
-║          CMOS INVERTER CIRCUIT ANALYSIS                   ║
-║          Voltage Transfer & Transient Characteristics      ║
-║                                                            ║
-║          SKY130 PDK Circuit Design Workshop               ║
-║          Understanding Digital Logic Fundamentals         ║
-║                                                            ║
-╚════════════════════════════════════════════════════════════╝
-```
-
-</div>
+- 🚀 **Overview**: Why CMOS inverters are the heart of digital circuits
+- 📂 **Files & Directory**: Your simulation playground
+- ⚡ **Quick-Run Commands**: Get results in a snap
+- 📜 **Netlist Snippets & .measure Directives**: Automate key measurements
+- 📈 **Transient Analysis**: Results, graphs, and switching secrets
+- 🔄 **Voltage Transfer Characteristic (VTC)**: DC insights and noise margins
+- 📊 **Comparison Tables & Insights**: Sizing and performance trade-offs
+- 🎨 **Advanced Visualizations (Python)**: Publication-quality plots
+- 🔮 **What to Try Next**: Push the boundaries of inverter design
+- 📚 **Appendix**: Netlist examples and advanced .measure tips
 
 ---
 
-## 📋 Table of Contents
+## 🚀 Overview: The CMOS Inverter – A Digital Superstar
 
-```
-┌──────────────────────────────────────────────────────────┐
-│ 1. 🎯 Introduction to CMOS Inverter                      │
-│ 2. ⚡ Circuit Configuration & Device Sizing             │
-│ 3. 📊 Voltage Transfer Characteristics (VTC)            │
-│ 4. 🔀 Operating Region Analysis                         │
-│ 5. ⏱️ Transient Analysis - Switching Behavior           │
-│ 6. 🔊 Noise Margin Analysis                             │
-│ 7. 🔋 Supply Voltage Variation Study                    │
-│ 8. 📐 Device Sizing Impact                              │
-│ 9. 🎓 Summary and Design Guidelines                     │
-└──────────────────────────────────────────────────────────┘
-```
+The **CMOS inverter** is the cornerstone of modern electronics, flipping logic signals with minimal power thanks to its complementary NMOS-PMOS pair. On Day 3, we dive into:
+- **Transient Analysis**: How fast does it switch? Measure rise/fall times and delays.
+- **Voltage Transfer Characteristic (VTC)**: How does V_out respond to V_in? Extract switching thresholds and noise margins.
+- **Scaling Effects**: How do PMOS/NMOS sizing (W_p=0.84 µm, W_n=0.36 µm) impact performance?
+
+**Creative Analogy**: Think of the CMOS inverter as a seesaw—NMOS pulls down, PMOS pulls up, and their balance determines speed and stability. Our mission? Fine-tune the seesaw for optimal performance! 🎢
+
+*Fun Fact*: CMOS technology powers everything from your smartphone to Mars rovers, thanks to its low static power consumption—less than a microwatt when idle!
+
+*Image Reference*: [CMOS Inverter Schematic] A clean diagram of the inverter circuit, showing PMOS and NMOS connected between V_dd and ground with input and output nodes. (Placeholder: Search “CMOS inverter schematic” or use `inverter_schematic.png` from your repository.)
 
 ---
 
-## 🎯 Section 1: Introduction to CMOS Inverter
+## 📂 Files & Directory: Your Simulation Hub
 
-### What is a CMOS Inverter?
+Navigate to the design directory containing your SPICE netlists:
 
-The **CMOS Inverter** is the most fundamental digital circuit, consisting of complementary PMOS and NMOS transistors that provide logic inversion with minimal power consumption.
-
-### Circuit Topology
-
-```
-                    VDD (1.8V)
-                       │
-                   ┌───┴───┐
-            Vin ───┤ PMOS  │  Pull-up
-                   │  (P)  │
-                   └───┬───┘
-                       │
-                       ├────── Vout
-                       │
-                   ┌───┴───┐
-            Vin ───┤ NMOS  │  Pull-down
-                   │  (N)  │
-                   └───┬───┘
-                       │
-                      GND
+```bash
+cd sky130CircuitDesignWorkshop/design/
 ```
 
-### Basic Operation Principle
-
-| Input (Vin) | PMOS State | NMOS State | Output (Vout) |
-|-------------|------------|------------|---------------|
-| **LOW (0V)** | ON | OFF | HIGH (VDD) |
-| **HIGH (VDD)** | OFF | ON | LOW (0V) |
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  Key Advantage: Near-zero static power consumption       ║
-║                                                          ║
-║  • Only one transistor conducts in steady state         ║
-║  • No DC current path from VDD to GND                   ║
-║  • Power consumed mainly during switching               ║
-╚══════════════════════════════════════════════════════════╝
-```
+**Key Files**:
+- `day3_inv_tran_Wp084_Wn036.spice`: Transient analysis with a pulsed input to study switching behavior.
+- `day3_inv_vtc_Wp084_Wn036.spice`: DC sweep for VTC analysis to map V_out vs V_in.
 
 ---
 
-## ⚡ Section 2: Circuit Configuration & Device Sizing
+## ⚙️ Transistor Sizing & Simulation Parameters
 
-### Device Specifications
+| Device       | W (µm) | L (µm) | Notes |
+|--------------|--------|--------|-------|
+| **PMOS (M1)** | 0.84   | 0.18   | Wider to compensate for lower hole mobility. |
+| **NMOS (M2)** | 0.36   | 0.18   | Optimized for balanced switching. |
+| **V_dd**     | 1.8 V  | —      | Standard for Sky130 PDK. |
+| **Input**    | Pulse (0→1.8V) | 1 ns rise/fall, 10 ns period | Defined in transient netlist. |
+| **Load Cap** | 10 fF  | —      | Typical for initial simulations. |
 
-**Standard Configuration:**
+*Note*: Confirm channel length (L) and load capacitance in your netlist, as they may vary slightly based on setup.
 
+**Scaling Insight**: PMOS is wider (W_p/W_n ≈ 2.33) to balance drive strength, as hole mobility (\(\mu_p\)) is ~2-3x lower than electron mobility (\(\mu_n\)). This ensures symmetric rise and fall times for clean logic transitions.
+
+*Image Reference*: [Transistor Sizing Diagram] Visual comparison of PMOS vs NMOS W/L ratios, highlighting the wider PMOS channel. (Placeholder: Search “MOSFET sizing diagram” or create a diagram in a tool like Draw.io.)
+
+---
+
+## ⚡ Quick-Run Commands: Fire Up NGSPICE!
+
+**Transient Analysis**:
+```bash
+cd sky130CircuitDesignWorkshop/design/
+ngspice day3_inv_tran_Wp084_Wn036.spice
+# Inside NGSPICE:
+plot v(out) v(in)
+# Export to CSV for post-processing:
+wrdata tran_out.csv v(out) v(in)
+```
+
+**VTC Analysis**:
+```bash
+ngspice day3_inv_vtc_Wp084_Wn036.spice
+# Inside NGSPICE:
+plot v(out) v(in)
+# Export to CSV:
+wrdata vtc_out.csv v(in) v(out)
+```
+
+  <p align="center">
+   <img src="da31.png" alt="GTKWave Counter Output" width="300%">
+</p>
+
+
+**Pro Tip**: Add a `.control` block to automate plotting and data export:
 ```spice
-*Model Description
-.param temp=27
-
-*Including sky130 library files
-.lib "sky130_fd_pr/models/sky130.lib.spice" tt
-
-*Netlist Description
-
-XM1 out in vdd vdd sky130_fd_pr__pfet_01v8 w=0.84 l=0.15
-XM2 out in 0 0 sky130_fd_pr__nfet_01v8 w=0.36 l=0.15
-
-Cload out 0 50fF
-
-Vdd vdd 0 1.8V
-Vin in 0 1.8V
-
-*simulation commands
-.op
-.dc Vin 0 1.8 0.01
-
 .control
 run
-setplot dc1
-display
+plot v(out) v(in)
+wrdata tran_out.csv v(out) v(in)
 .endc
+```
 
+---
+
+## 📜 Netlist Snippets & .measure Directives
+
+Automate measurements for precision and efficiency. Add these to your netlists before `.end`:
+
+**Transient Netlist** (`day3_inv_tran_Wp084_Wn036.spice`):
+```spice
+* Measure rise/fall times and propagation delays
+.meas tran trise TRIG v(out) VAL=0.18 TD=0 RISE=1 TARG v(out) VAL=1.62
+.meas tran tfall TRIG v(out) VAL=1.62 TD=0 FALL=1 TARG v(out) VAL=0.18
+.meas tran tpLH TRIG v(in) VAL=0.9 TD=0 RISE=1 TARG v(out) VAL=0.9
+.meas tran tpHL TRIG v(in) VAL=0.9 TD=0 FALL=1 TARG v(out) VAL=0.9
+.meas tran tprop_avg param='(tpLH+tpHL)/2'
+.meas tran Ipeak_max MAX I(Vdd) FROM=0 TO=50n
+```
+
+**VTC Netlist** (`day3_inv_vtc_Wp084_Wn036.spice`):
+```spice
+* Measure VIL, VIH, and estimate VM
+.meas dc VIL FIND V(in) WHEN V(out)=1.62
+.meas dc VIH FIND V(in) WHEN V(out)=0.18
+.meas dc VM FIND V(in) WHEN V(out)=0.9
+```
+
+*Note*: For precise V_M (maximum gain point), post-process VTC data in Python, as NGSPICE’s `.measure` cannot directly compute derivatives like dV_out/dV_in.
+
+*Image Reference*: [Netlist with .measure] Annotated screenshot of the netlist with `.measure` directives highlighted. (Placeholder: Annotate `ed182767-4a54-4039-8cb6-6d80f9f32a35.png` in a tool like GIMP to show `.measure` lines.)
+
+---
+
+## 📈 Transient Analysis: Switching in Action
+
+**Steps**:
+1. Add `.measure` directives to `day3_inv_tran_Wp084_Wn036.spice`.
+2. Run:
+   ```bash
+   ngspice day3_inv_tran_Wp084_Wn036.spice
+   plot v(out) v(in)
+   ```
+3. Check console for `.measure` outputs or export to `tran_out.csv`.
+
+**Results Table** (Placeholder—replace with your measurements after running):
+
+| Metric                | Value | Units | Notes |
+|-----------------------|-------|-------|-------|
+| **Rise Time (t_rise)** | 45    | ps    | Time from 10% to 90% of V_out. |
+| **Fall Time (t_fall)** | 38    | ps    | Faster due to NMOS’s higher mobility. |
+| **Prop. Delay (t_pLH)**| 60    | ps    | Low-to-high transition (input to output at 50%). |
+| **Prop. Delay (t_pHL)**| 72    | ps    | High-to-low transition (input to output at 50%). |
+| **Avg. Prop. Delay**  | 66    | ps    | (t_pLH + t_pHL)/2, key for circuit timing. |
+| **Peak Current (I_peak)** | 150 | µA    | Short-circuit current during switching. |
+
+**Visualizations**:
+- *Image Reference*: [Transient Plot] Waveforms showing V_in (pulse) and V_out (inverted response). (See `974114f3-6b3f-497f-9aa2-318d8a05191d.png` and `0826d46d-4e8d-4813-960e-b96c266a710a.png`.)
+- *Chart Description*: A line plot of V_in and V_out vs time (0 to 50 ns), with V_in as a blue pulse (0 to 1.8V) and V_out as an orange inverted signal. Generate using the Python script below and embed as `tran_plot.png`.
+- *Additional Chart Suggestion*: Plot I(Vdd) vs time to visualize short-circuit current spikes during transitions. Use NGSPICE’s `wrdata` to export I(Vdd) and plot in Python.
+
+**Interpretation**:
+- **Rise/Fall Times**: Influenced by load capacitance (10 fF) and transistor sizing. Wider PMOS reduces t_rise but increases chip area.
+- **Propagation Delays**: t_pHL is often faster due to NMOS’s higher electron mobility compared to PMOS’s hole mobility.
+- **Power Spikes**: Short-circuit current (I_peak) occurs when both transistors are partially on during switching—critical for low-power design optimization.
+
+*Creative Analogy*: The inverter is like a light switch: NMOS slams it off, PMOS flips it on. Proper sizing ensures a smooth, balanced flick without wasting energy! 💡
+
+*Image Reference*: [Annotated Transient Plot] Waveform with markers for t_rise, t_fall, t_pLH, and t_pHL. (Placeholder: Annotate `974114f3-6b3f-497f-9aa2-318d8a05191d.png` to highlight timing metrics.)
+
+---
+
+## 🔄 VTC Analysis: The Logic Flip Zone
+
+**Steps**:
+1. Add `.measure` directives to `day3_inv_vtc_Wp084_Wn036.spice`.
+2. Run:
+   ```bash
+   ngspice day3_inv_vtc_Wp084_Wn036.spice
+   plot v(out) v(in)
+   ```
+3. Export to `vtc_out.csv` for Python post-processing.
+
+  <p align="center">
+   <img src="day32.png" alt="GTKWave Counter Output" width="300%">
+</p>
+
+   
+
+**Results Table** (Placeholder—replace with your measurements):
+
+| Metric                | Value | Units | Notes |
+|-----------------------|-------|-------|-------|
+| **Switching Point (V_M)** | 0.9 | V     | Where V_out = V_in or max |dV_out/dV_in|. |
+| **Noise Margin Low (NML)** | 0.47 | V   | V_IL - V_OL, ensures robustness against low-side noise. |
+| **Noise Margin High (NMH)**| 0.45 | V   | V_OH - V_IH, ensures robustness against high-side noise. |
+| **Max Gain (|dV_out/dV_in|)** | 18 | — | Slope magnitude at transition, indicates switching sharpness. |
+
+**Visualizations**:
+- *Image Reference*: [VTC Plot] V_out vs V_in curve, showing the sharp transition region. (See `d58e51ef-bc3c-420d-ac5d-8f00ce99ee97.png` and `fad418c5-17ab-4a95-b4cb-a0dbca4e3e4c.png`.)
+- *Chart Description*: A line plot of V_out vs V_in (0 to 1.8V), with a red dashed line at V_M (e.g., 0.9V) to mark the switching point. Generate using the Python script below and embed as `vtc_plot.png`.
+- *Additional Chart Suggestion*: Plot |dV_out/dV_in| vs V_in to highlight the maximum gain point, which corresponds to V_M. Embed as `gain_plot.png`.
+
+**Interpretation**:
+- **V_M**: Ideally near V_dd/2 (0.9V) for symmetric design, ensuring balanced switching.
+- **Noise Margins**: Higher NML and NMH ensure the inverter can tolerate noise without flipping states, critical for reliable logic.
+- **Gain**: A high |dV_out/dV_in| (e.g., 18) indicates a sharp transition, ideal for digital circuits like gates and flip-flops.
+
+*Image Reference*: [Gain Curve] Plot of |dV_out/dV_in| vs V_in, with a peak at V_M. (Placeholder: Generate via Python script and embed as `gain_plot.png`.)
+
+*Creative Analogy*: The VTC is like a tightrope walker’s balance point—V_M is where the inverter teeters between logic 0 and 1, with noise margins as safety nets on either side! 🎪
+
+---
+
+```
+
+**Outputs**:
+- `tran_plot.png`: Input (blue) and output (orange) waveforms vs time, showing the inverter’s switching behavior.
+- `vtc_plot.png`: V_out vs V_in with V_M marked, highlighting the transition region.
+- `gain_plot.png`: Gain (|dV_out/dV_in|) vs V_in, with a peak at V_M.
+
+*Image Reference*: [Python Plots] Embed `tran_plot.png`, `vtc_plot.png`, and `gain_plot.png` in your report or presentation for professional visuals.
+
+*Additional Visualization Idea*: Create a subplot combining VTC and gain curves side-by-side for a compact summary. Modify the Python script to use `plt.subplots(1, 2)`.
+
+---
+
+## 📊 Comparison Tables & Insights
+
+**Sizing Impact Table** (Run parametric sweeps to fill):
+
+| W_p/W_n Ratio | t_rise (ps) | t_fall (ps) | t_prop (ps) | I_peak (µA) | Energy (fJ) |
+|---------------|-------------|-------------|-------------|-------------|-------------|
+| 0.84/0.36 (base) | 45          | 38          | 66          | 150         | 0.12        |
+| 0.42/0.36 (×0.5 W_p) | TBD         | TBD         | TBD         | TBD         | TBD         |
+| 1.68/0.36 (×2 W_p) | TBD         | TBD         | TBD         | TBD         | TBD         |
+
+**Insights**:
+- **W_p/W_n Ratio**: A higher ratio (e.g., 2.33) reduces t_rise by boosting PMOS drive but increases area and dynamic power.
+- **Energy per Transition**: Calculated as \( E = \int I_{Vdd} \cdot V_{dd} \, dt \) during switching—use `.measure` or Python integration for precise values.
+- **Trade-offs**: Optimize for speed (smaller delays) vs power (lower I_peak) vs area (smaller W) based on application, such as low-power IoT devices or high-speed CPUs.
+
+*Chart Description*: A scatter plot of propagation delay (t_prop) vs W_p/W_n ratio, showing how increasing PMOS width affects timing. Generate using the Python script by running parametric sweeps (modify W_p in the netlist) and plotting results as `delay_vs_ratio.png`.
+
+*Image Reference*: [Parametric Sweep Plot] Embed the scatter plot after generating with Python. (Placeholder: Search “parametric sweep MOSFET” for inspiration.)
+
+---
+
+## 🔮 What to Try Next: Push the Boundaries!
+
+1. **Sweep Load Capacitance**: Increase C_L (e.g., 5 fF, 20 fF, 50 fF) and measure impact on t_rise, t_fall, and t_prop.
+2. **Optimize Sizing**: Sweep W_p and W_n to minimize t_prop while keeping power consumption low.
+3. **Add Interconnect Parasitics**: Model RC loads (e.g., 100 Ω resistance, 5 fF capacitance) to simulate realistic IO performance.
+4. **Monte Carlo Analysis**: Simulate threshold voltage (V_th) mismatch to study V_M variation across process corners.
+5. **Layout & LVS**: Create a layout in Magic or KLayout, extract parasitics, and run post-layout simulations to compare with schematic results.
+
+*Creative Challenge*: Design an inverter for a space mission—minimize power for battery life while ensuring radiation hardness. Tweak W/L ratios, add shielding capacitance, and plot trade-offs in speed vs power. Imagine your inverter powering a Mars rover’s logic circuits! 🚀
+
+*Image Reference*: [Inverter Layout] Example CMOS inverter layout in Sky130 PDK. (Placeholder: Search “CMOS inverter layout Sky130” or create a layout screenshot in Magic/KLayout.)
+
+---
+
+## 📚 Appendix: Full Netlist Example
+
+**Transient Netlist**:
+```spice
+* day3_inv_tran_Wp084_Wn036.spice
+.include sky130.lib
+
+Vdd VDD 0 1.8
+Vin IN 0 PULSE(0 1.8 1n 1n 1n 10n 20n)
+M1 OUT IN VDD VDD PMOS W=0.84u L=0.18u
+M2 OUT IN 0 0 NMOS W=0.36u L=0.18u
+CL OUT 0 10f
+
+.meas tran trise TRIG v(out) VAL=0.18 TD=0 RISE=1 TARG v(out) VAL=1.62
+.meas tran tfall TRIG v(out) VAL=1.62 TD=0 FALL=1 TARG v(out) VAL=0.18
+.meas tran tpLH TRIG v(in) VAL=0.9 TD=0 RISE=1 TARG v(out) VAL=0.9
+.meas tran tpHL TRIG v(in) VAL=0.9 TD=0 FALL=1 TARG v(out) VAL=0.9
+.meas tran tprop_avg param='(tpLH+tpHL)/2'
+.meas tran Ipeak_max MAX I(Vdd) FROM=0 TO=50n
+
+.tran 0.1n 50n uic
+.control
+run
+plot v(out) v(in)
+wrdata tran_out.csv time v(in) v(out)
+.endc
 .end
 ```
 
-### Device Parameter Summary
-
-| Parameter | PMOS (XM1) | NMOS (XM2) | Notes |
-|-----------|------------|------------|-------|
-| **Width (W)** | 0.84 µm | 0.36 µm | PMOS wider for mobility compensation |
-| **Length (L)** | 0.15 µm | 0.15 µm | Minimum channel length |
-| **W/L Ratio** | 5.6 | 2.4 | PMOS ratio 2.33× larger |
-| **Model** | pfet_01v8 | nfet_01v8 | Standard 1.8V devices |
-
-### Why PMOS is Wider?
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  Mobility Compensation Strategy:                         ║
-║                                                          ║
-║  Electron mobility (µn) ≈ 400 cm²/V·s                   ║
-║  Hole mobility (µp) ≈ 150 cm²/V·s                       ║
-║                                                          ║
-║  Ratio: µn/µp ≈ 2.5                                     ║
-║                                                          ║
-║  Design: Wp/Wn = 0.84/0.36 = 2.33 ≈ 2.5                ║
-║                                                          ║
-║  Result: Balanced rise and fall times                   ║
-║          Symmetric switching characteristics             ║
-╚══════════════════════════════════════════════════════════╝
-```
-
----
-
-## 📊 Section 3: Voltage Transfer Characteristics (VTC)
-
-### DC Sweep Simulation
-
-#### Objective
-Analyze how output voltage (Vout) responds to input voltage (Vin) variation from 0V to 1.8V.
-
-#### Simulation Command
+**VTC Netlist**:
 ```spice
+* day3_inv_vtc_Wp084_Wn036.spice
+.include sky130.lib
+
+Vdd VDD 0 1.8
+Vin IN 0 0
+M1 OUT IN VDD VDD PMOS W=0.84u L=0.18u
+M2 OUT IN 0 0 NMOS W=0.36u L=0.18u
+CL OUT 0 10f
+
 .dc Vin 0 1.8 0.01
-```
-- Sweeps Vin from 0V to 1.8V in 10mV steps
-- Captures complete voltage transfer curve
-- 181 data points for smooth characteristic
+.meas dc VIL FIND V(in) WHEN V(out)=1.62
+.meas dc VIH FIND V(in) WHEN V(out)=0.18
+.meas dc VM FIND V(in) WHEN V(out)=0.9
 
-### VTC Plot Results
-
-<p align="center">
-  <img src="plot_4.png" alt="Voltage Transfer Characteristic" width="90%">
-</p>
-
-*Figure: Voltage Transfer Characteristic showing the relationship between input voltage (Vin) and output voltage (Vout). The curve demonstrates the inverter's sharp transition region around Vm ≈ 0.9V.*
-
-### VTC Curve Analysis
-
-```
-Vout (V)
-  │
-1.8│  ─────────╮                Region 1: PMOS ON, NMOS OFF
-   │           │
-1.5│           │╲               Region 2: Both transitioning
-   │           │ ╲
-1.2│           │  ╲             Region 3: Maximum gain
-   │           │   ╲            (both in saturation)
-0.9│           │    ●  ← Vm    
-   │           │     ╲          Region 4: NMOS strengthening
-0.6│           │      ╲
-   │           │       ╲        Region 5: PMOS OFF, NMOS ON
-0.3│           │        ╲
-   │           │         ──────
-0.0│           │               
-   └───────────┼────────────────→ Vin (V)
-              0.0  0.9  1.8
+.control
+run
+plot v(out) v(in)
+wrdata vtc_out.csv v(in) v(out)
+.endc
+.end
 ```
 
 ---
 
-## 🔀 Section 4: Operating Region Analysis
-
-### Five Operating Regions
-
-The VTC curve divides into five distinct regions based on transistor states:
-
-#### **Region 1: Vin < Vth,n (0V to ~0.4V)**
-
-```
-PMOS: Linear (strong conduction)
-NMOS: Cut-off (no conduction)
-Vout: ≈ VDD (1.8V)
-
-Behavior:
-• PMOS acts as low-resistance path to VDD
-• Output pulled high to supply voltage
-• Minimal static power (only leakage)
-```
-
----
-
-#### **Region 2: Vth,n < Vin < Vm (~0.4V to ~0.9V)**
-
-```
-PMOS: Linear → Saturation
-NMOS: Saturation (increasing current)
-Vout: Begins falling from VDD
-
-Behavior:
-• NMOS turns on, starts conducting
-• Both devices share current
-• Output voltage decreasing
-• High gain region begins
-```
-
----
-
-#### **Region 3: Vin ≈ Vm (~0.9V)**
-
-```
-PMOS: Saturation
-NMOS: Saturation
-Vout: ≈ VDD/2 (0.9V)
-
-Behavior:
-• Critical point: Both fully saturated
-• Maximum current from VDD to GND
-• Highest static power dissipation
-• Maximum voltage gain (steepest slope)
-• Switching threshold: Vin = Vout
-```
-
-**Key Equations at Vm:**
-```
-Id,PMOS = Id,NMOS
-
-(1/2)·µp·Cox·(Wp/Lp)·(VDD-Vin-|Vth,p|)² = 
-(1/2)·µn·Cox·(Wn/Ln)·(Vin-Vth,n)²
-```
-
----
-
-#### **Region 4: Vm < Vin < VDD-|Vth,p| (~0.9V to ~1.4V)**
-
-```
-PMOS: Saturation → Linear
-NMOS: Linear (strong conduction)
-Vout: Continues falling toward GND
-
-Behavior:
-• NMOS dominates current sinking
-• PMOS weakening
-• Output approaching ground
-• High gain region ending
-```
-
----
-
-#### **Region 5: Vin > VDD-|Vth,p| (~1.4V to 1.8V)**
-
-```
-PMOS: Cut-off (no conduction)
-NMOS: Linear (full conduction)
-Vout: ≈ 0V (GND)
-
-Behavior:
-• NMOS acts as low-resistance path to GND
-• Output pulled low to ground
-• Minimal static power (only leakage)
-```
-
----
-
-### Operating Region Summary
-
-| Region | Input Range | PMOS | NMOS | Output | Gain |
-|--------|-------------|------|------|--------|------|
-| **1** | 0 - 0.4V | Linear | Cut-off | ~1.8V | Low |
-| **2** | 0.4 - 0.9V | Linear/Sat | Saturation | Falling | High |
-| **3** | ~0.9V | Saturation | Saturation | ~0.9V | **Max** |
-| **4** | 0.9 - 1.4V | Saturation | Linear | Falling | High |
-| **5** | 1.4 - 1.8V | Cut-off | Linear | ~0V | Low |
-
----
-
-## ⏱️ Section 5: Transient Analysis - Switching Behavior
-
-### Transient Simulation Setup
-
-#### Input Pulse Configuration
-
-```spice
-Vin in 0 PULSE(0V 1.8V 0ns 0.1ns 0.1ns 2ns 4ns)
-```
-
-**Pulse Parameters:**
-- **Low level**: 0V
-- **High level**: 1.8V  
-- **Rise time**: 0.1ns
-- **Fall time**: 0.1ns
-- **Pulse width**: 2ns
-- **Period**: 4ns
-
-#### Transient Analysis Command
-
-```spice
-.tran 0.01n 10n
-```
-- Time step: 10ps
-- Total time: 10ns
-- Captures multiple switching cycles
-
-### Transient Waveform Results
-
-<p align="center">
-  <img src="plot_3.png" alt="Transient Analysis Waveform" width="90%">
-</p>
-
-*Figure: Transient analysis showing input pulse (blue) and inverted output response (red). The waveform clearly demonstrates the inverter's switching behavior over multiple clock cycles.*
-
-### Switching Characteristics
-
-```
-        Input (blue)           Output (red)
-         │                          │
-    1.8V ├──┐    ┌──┐    ┌──       │  ┌────┐    ┌────
-         │  │    │  │    │          │  │    │    │
-         │  │    │  │    │          │  │    │    │
-         │  │    │  │    │          ╰──╯    ╰────╯
-    0V   ╰──╯    ╰──╯    ╰──
-         
-         └─ tpHL ─┘└─ tpLH ─┘
-```
-
-### Timing Parameter Extraction
-
-#### Rise Time (tr)
-
-```
-Definition: Time for output to rise from 10% to 90% of VDD
-
-tr: 10% (0.18V) → 90% (1.62V)
-
-Measured Value: ~60-80 ps
-```
-
-#### Fall Time (tf)
-
-```
-Definition: Time for output to fall from 90% to 10% of VDD
-
-tf: 90% (1.62V) → 10% (0.18V)
-
-Measured Value: ~40-60 ps
-(Faster due to higher electron mobility)
-```
-
-#### Propagation Delay - Low to High (tpLH)
-
-```
-Definition: Input 50% → Output 50% (rising)
-
-Delay from Vin=0.9V (rising) to Vout=0.9V (rising)
-
-Measured Value: ~70-90 ps
-```
-
-#### Propagation Delay - High to Low (tpHL)
-
-```
-Definition: Input 50% → Output 50% (falling)
-
-Delay from Vin=0.9V (falling) to Vout=0.9V (falling)
-
-Measured Value: ~50-70 ps
-(Typically faster than tpLH)
-```
-
-### Timing Summary Table
-
-| Parameter | Definition | Typical Value | Notes |
-|-----------|------------|---------------|-------|
-| **Rise Time (tr)** | 10%-90% rise | 60-80 ps | Limited by PMOS drive |
-| **Fall Time (tf)** | 90%-10% fall | 40-60 ps | Faster (NMOS stronger) |
-| **tpLH** | 50% delay (L→H) | 70-90 ps | PMOS charging |
-| **tpHL** | 50% delay (H→L) | 50-70 ps | NMOS discharging |
-| **tp (avg)** | (tpLH+tpHL)/2 | 60-80 ps | Overall speed metric |
-
----
-
-## 🔊 Section 6: Noise Margin Analysis
-
-### What are Noise Margins?
-
-Noise margins define how much noise a logic gate can tolerate before incorrect logic interpretation occurs.
-
-### Critical Voltage Points
-
-From the VTC curve, we extract four key voltages:
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  VOH : Output HIGH voltage (when input is LOW)          ║
-║  VOL : Output LOW voltage (when input is HIGH)          ║
-║  VIH : Input HIGH threshold                             ║
-║  VIL : Input LOW threshold                              ║
-╚══════════════════════════════════════════════════════════╝
-```
-
-### Voltage Point Definitions
-
-#### VIL and VIH Determination
-
-```
-VIL: Input voltage where dVout/dVin = -1 (lower transition)
-VIH: Input voltage where dVout/dVin = -1 (upper transition)
-```
-
-These points mark where the gain reaches unity (slope = -1).
-
-### Noise Margin Calculations
-
-#### Noise Margin Low (NML)
-
-```
-NML = VIL - VOL
-
-Represents noise immunity for logic LOW
-```
-
-#### Noise Margin High (NMH)
-
-```
-NMH = VOH - VIH
-
-Represents noise immunity for logic HIGH
-```
-
-### Measured Values (Typical for SKY130)
-
-| Parameter | Value | Description |
-|-----------|-------|-------------|
-| **VOH** | 1.78V | Output HIGH (≈ VDD - 20mV) |
-| **VOL** | 0.02V | Output LOW (≈ GND + 20mV) |
-| **VIH** | 1.05V | Input HIGH threshold |
-| **VIL** | 0.75V | Input LOW threshold |
-| **NMH** | 0.73V | HIGH noise margin |
-| **NML** | 0.73V | LOW noise margin |
-
-### Noise Margin Visualization
-
-```
-Voltage
-  │
-1.8V├─────────  VOH = 1.78V
-    │           ↕ NMH = 0.73V
-    │─────────  VIH = 1.05V
-    │
-    │           Undefined Region
-    │
-    │─────────  VIL = 0.75V
-    │           ↕ NML = 0.73V
-0.0V├─────────  VOL = 0.02V
-```
-
-### Design Guidelines
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  Good Noise Margin Criteria:                             ║
-║                                                          ║
-║  • NMH > 30% of VDD (> 0.54V for 1.8V supply)          ║
-║  • NML > 30% of VDD                                     ║
-║  • NMH ≈ NML (balanced design)                          ║
-║                                                          ║
-║  This design achieves ~40% margins - Excellent!         ║
-╚══════════════════════════════════════════════════════════╝
-```
-
----
-
-## 🔋 Section 7: Supply Voltage Variation Study
-
-### Motivation
-
-Real circuits experience supply voltage variations due to:
-- IR drop across power distribution network
-- Load current fluctuations
-- Process/temperature variations
-- Battery discharge (portable devices)
-
-### VTC at Different Supply Voltages
-
-<p align="center">
-  <img src="day3_supply_sweep.png" alt="Supply Voltage Variation" width="90%">
-</p>
-
-### Simulation Setup
-
-```spice
-.dc Vin 0 1.8 0.01 Vdd 0.8 1.8 0.2
-```
-
-Tests inverter at VDD = 0.8V, 1.0V, 1.2V, 1.4V, 1.6V, 1.8V
-
-### Observations
-
-| VDD | Vm | NMH | NML | Gain | Notes |
-|-----|-----|-----|-----|------|-------|
-| **1.8V** | 0.90V | 0.73V | 0.73V | 18 | Nominal design |
-| **1.6V** | 0.80V | 0.64V | 0.64V | 16 | Still robust |
-| **1.4V** | 0.70V | 0.54V | 0.54V | 14 | Marginal |
-| **1.2V** | 0.60V | 0.43V | 0.43V | 12 | Low margins |
-| **1.0V** | 0.50V | 0.32V | 0.32V | 10 | Near minimum |
-| **0.8V** | 0.40V | 0.21V | 0.21V | 8 | Unreliable |
-
-### Key Findings
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  Supply Voltage Impact:                                  ║
-║                                                          ║
-║  ✓ Switching threshold (Vm) scales with VDD             ║
-║    Vm ≈ 0.5 × VDD (well-balanced design)                ║
-║                                                          ║
-║  ✓ Noise margins decrease with lower VDD                ║
-║    Critical below 1.2V for reliable operation           ║
-║                                                          ║
-║  ✓ Voltage gain decreases with lower VDD                ║
-║    Sharper transitions at higher voltages               ║
-╚══════════════════════════════════════════════════════════╝
-```
-
----
-
-## 📐 Section 8: Device Sizing Impact
-
-### Sizing Study Configuration
-
-<p align="center">
-  <img src="day3_sizing_spice.png" alt="Different Sizing Netlist" width="85%">
-</p>
-
-### Parametric Sizing Study
-
-| Configuration | Wp | Wn | Wp/Wn | Application |
-|---------------|----|----|-------|-------------|
-| **Base Design** | 0.84µm | 0.36µm | 2.33 | Balanced |
-| **Wide PMOS** | 1.68µm | 0.36µm | 4.67 | Fast rise |
-| **Narrow PMOS** | 0.42µm | 0.36µm | 1.17 | Slow rise |
-| **Equal Width** | 0.36µm | 0.36µm | 1.0 | Asymmetric |
-| **Scaled Up** | 1.68µm | 0.72µm | 2.33 | High drive |
-
-### Impact on Switching Threshold
-
-<p align="center">
-  <img src="day3_sizing_vtc.png" alt="VTC with Different Sizing" width="90%">
-</p>
-
-#### Vm vs Wp/Wn Ratio
-
-```
-Vm (V)
-  │
-1.2│              ╱───────
-   │           ╱──
-1.0│        ╱──          Increasing PMOS width
-   │     ╱──            shifts Vm higher
-0.8│  ╱──
-   │╱──
-0.6│
-   └────────┬────────┬────────┬──────→ Wp/Wn
-           1.0     2.0     3.0    4.0
-```
-
-### Sizing Impact Summary
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  PMOS Width Effects:                                     ║
-║                                                          ║
-║  Wp ↑  →  Vm ↑  (threshold shifts toward VDD)          ║
-║  Wp ↑  →  tr ↓  (faster rise time)                     ║
-║  Wp ↑  →  tf →  (fall time unchanged)                  ║
-║  Wp ↑  →  Area ↑ (larger silicon area)                 ║
-║  Wp ↑  →  Pdyn ↑ (higher dynamic power)                ║
-║                                                          ║
-║  Design Trade-off: Balance speed vs area vs power       ║
-╚══════════════════════════════════════════════════════════╝
-```
-
-### Measured Results
-
-| Wp/Wn | Vm (V) | tr (ps) | tf (ps) | tp (ps) | Relative Area |
-|-------|--------|---------|---------|---------|---------------|
-| 1.17 | 0.75 | 110 | 45 | 78 | 0.7× |
-| 2.33 | 0.90 | 70 | 45 | 58 | 1.0× |
-| 4.67 | 1.05 | 45 | 45 | 45 | 1.7× |
-
-**Key Observation:** Wp/Wn = 2.33 provides good balance between symmetric switching (Vm ≈ VDD/2) and area efficiency.
-
----
-
-## 🎓 Section 9: Summary and Design Guidelines
-
-### Key Learnings
-
-#### 1. **Voltage Transfer Characteristics**
-
-```
-✓ Five distinct operating regions
-✓ Maximum gain at switching threshold (Vm)
-✓ Sharp transition essential for digital logic
-✓ Symmetric design: Vm ≈ VDD/2
-```
-
-#### 2. **Transient Behavior**
-
-```
-✓ Rise time limited by PMOS drive strength
-✓ Fall time typically faster (higher electron mobility)
-✓ Propagation delay determines maximum clock frequency
-✓ Load capacitance directly affects timing
-```
-
-#### 3. **Noise Immunity**
-
-```
-✓ NMH and NML > 30% of VDD required
-✓ Balanced margins indicate good design
-✓ Degrades at low supply voltages
-✓ Critical for reliable circuit operation
-```
-
-#### 4. **Device Sizing**
-
-```
-✓ Wp/Wn ≈ 2.5 compensates for mobility difference
-✓ Adjusting ratio shifts switching threshold
-✓ Larger devices → faster but more power/area
-✓ Optimize based on application requirements
-```
-
----
-
-### Design Guidelines
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  CMOS Inverter Design Checklist:                         ║
-║                                                          ║
-║  1. Set Wp/Wn ≈ 2.5 for balanced switching              ║
-║                                                          ║
-║  2. Verify Vm ≈ VDD/2 for maximum noise immunity        ║
-║                                                          ║
-║  3. Check NMH, NML > 30% VDD for robustness             ║
-║                                                          ║
-║  4. Size for target propagation delay                    ║
-║                                                          ║
-║  5. Consider supply voltage variation effects            ║
-║                                                          ║
-║  6. Balance performance vs power vs area                 ║
-║                                                          ║
-║  7. Verify operation across process corners              ║
-╚══════════════════════════════════════════════════════════╝
-```
-
-### Application-Specific Optimization
-
-| Application | Priority | Sizing Strategy |
-|-------------|----------|-----------------|
-| **High-Speed Logic** | Speed | Large Wp, Wn; minimize CL |
-| **Low-Power IoT** | Power | Minimum sizing; lower VDD |
-| **Memory** | Density | Minimum L; moderate W |
-| **Analog/Mixed** | Symmetry | Precise Wp/Wn = 2.5 |
-| **I/O Buffers** | Drive | Large sizing; multiple stages |
-
----
-
-### Performance Summary
-
-**Standard Design (Wp=0.84µm, Wn=0.36µm, L=0.15µm):**
-
-```
-┌────────────────────────────────────────────────────┐
-│ Supply Voltage (VDD):        1.8V                  │
-│ Switching Threshold (Vm):    0.90V (50% VDD)      │
-│ Voltage Gain:                ~18                   │
-│ Noise Margin High (NMH):     0.73V (40.6% VDD)    │
-│ Noise Margin Low (NML):      0.73V (40.6% VDD)    │
-│ Propagation Delay (tp):      60-80 ps             │
-│ Rise Time (tr):              60-80 ps             │
-│ Fall Time (tf):              40-60 ps             │
-└────────────────────────────────────────────────────┘
-```
-
----
-
-## 📚 References
-
-- SKY130 PDK Documentation: https://skywater-pdk.readthedocs.io
-- Weste & Harris, "CMOS VLSI Design", 4th Edition
-- Razavi, "Design of Analog CMOS Integrated Circuits"
-- ngspice User Manual: http://ngspice.sourceforge.net
-
----
-
-<div align="center">
-
-```
-╔════════════════════════════════════════════════════════╗
-║                                                        ║
-║  🎉 Day 3 Complete!                                   ║
-║                                                        ║
-║  You've mastered CMOS inverter analysis including:    ║
-║  ✓ Voltage transfer characteristics                   ║
-║  ✓ Transient switching behavior                       ║
-║  ✓ Noise margin calculations                          ║
-║  ✓ Device sizing optimization                         ║
-║                                                        ║
-║  Ready for complex digital circuit design! 🚀         ║
-║                                                        ║
-╚════════════════════════════════════════════════════════╝
-```
-
-**Lab Data Summary:**
-- Device: PMOS (W=0.84µm) + NMOS (W=0.36µm), L=0.15µm
-- Wp/Wn ratio: 2.33 (balanced design)
-- Switching threshold: 0.9V (ideal for 1.8V supply)
-- Noise margins: >40% of VDD (excellent)
-- Propagation delay: ~70ps (high performance)
-
-</div>
+**References**:
+1. CMOS fundamentals: Razavi, *Design of Analog CMOS Integrated Circuits*, 2nd Edition.
+2. Sky130 PDK documentation: SkyWater Technology Foundry.
+3. NGSPICE .measure syntax: NGSPICE User Manual (version 40).
