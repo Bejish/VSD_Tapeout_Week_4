@@ -220,7 +220,7 @@ ngspice day4_inv_noisemargin_wp1_wn036.spice
 ### VTC Plot
 
 <p align="center">
-  <img src="plot_5.png" alt="Voltage Transfer Characteristic with Noise Margins" width="90%">
+  <img src="day4.png" alt="Voltage Transfer Characteristic with Noise Margins" width="90%">
 </p>
 
 *Figure: Voltage Transfer Characteristic showing the relationship between input and output voltages. The steep transition region indicates high voltage gain and sharp switching.*
