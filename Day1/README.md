@@ -300,7 +300,13 @@ The `-vdd#branch` command plots the current flowing through the Vdd source, whic
 ### Simulation Output Analysis
 
 <p align="center">
-  <img src="day1_img1.png" alt="NMOS Id-Vds Characteristics" width="90%">
+  <img src="day1_1.png" alt="NMOS Id-Vds Characteristics" width="90%">
+</p>
+
+### SPICE NETLIST
+
+<p align="center">
+  <img src="day1_2.png" alt="netlist" width="90%">
 </p>
 
 ### Understanding the Curve Family
