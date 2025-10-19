@@ -594,24 +594,6 @@ Critical length: When L < 3× depletion width
 
 ## 💡 Section 6: Key Observations and Insights
 
-### Current Drive Analysis
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  Critical Finding:                                        ║
-║                                                          ║
-║  Despite similar W/L ratios (2.5), the scaled device    ║
-║  delivers HALF the saturation current.                   ║
-║                                                          ║
-║  Day 1: Id,sat = 400 µA (L=2µm, W=5µm)                 ║
-║  Day 2: Id,sat = 200 µA (L=0.15µm, W=0.39µm)           ║
-║                                                          ║
-║  This defies simple first-order models and highlights   ║
-║  the importance of velocity saturation in nanoscale!    ║
-╚══════════════════════════════════════════════════════════╝
-```
-
-### Design Trade-offs
 
 For digital circuits:
 ```
@@ -638,27 +620,6 @@ For analog circuits:
   - Fast comparators
   - Low-voltage applications
 ```
-
-### Practical Design Guidelines
-
-```
-┌────────────────────────────────────────────────────────┐
-│                                                        │
-│  Rule 1: Use minimum L only when speed is critical    │
-│          → Accept trade-offs in ro, Vth variation     │
-│                                                        │
-│  Rule 2: For current sources, use L ≥ 2× Lmin        │
-│          → Improves matching and output resistance     │
-│                                                        │
-│  Rule 3: Widen devices to compensate for lower Id     │
-│          → W must increase more than L decreases       │
-│                                                        │
-│  Rule 4: Account for velocity saturation in sizing    │
-│          → Don't rely on Id ∝ W/L for short channels  │
-│                                                        │
-└────────────────────────────────────────────────────────┘
-```
-
 ---
 
 ## 🎓 Section 7: Conclusions and Design Guidelines
@@ -678,23 +639,6 @@ This comprehensive scaling study revealed critical insights into modern transist
 
 ### Design Recommendations
 
-```
-╔══════════════════════════════════════════════════════════╗
-║  For Digital Designers:                                  ║
-║  • Use minimum-L devices for speed-critical paths       ║
-║  • Apply multi-Vth strategies (mix of standard/low Vth) ║
-║  • Size for worst-case process corners                  ║
-║                                                          ║
-║  For Analog Designers:                                   ║
-║  • Use longer channels (2-4× minimum) for current sinks ║
-║  • Bias in moderate inversion for best gm/Id            ║
-║  • Consider cascoding to improve output resistance      ║
-║                                                          ║
-║  For Mixed-Signal Designers:                             ║
-║  • Partition digital (min-L) from analog (longer-L)     ║
-║  • Use thick-oxide devices for voltage headroom         ║
-║  • Isolate sensitive analog from noisy digital          ║
-╚══════════════════════════════════════════════════════════╝
 ```
 
 
@@ -722,17 +666,7 @@ This comprehensive scaling study revealed critical insights into modern transist
 <div align="center">
 
 ```
-╔════════════════════════════════════════════════════════╗
-║                                                        ║
-║  🎉 Day 2 Complete!                                   ║
-║                                                        ║
-║  You've successfully analyzed device scaling effects  ║
-║  and understand the trade-offs between size,          ║
-║  speed, and performance in nanoscale transistors      ║
-║                                                        ║
-║  Continue exploring to master VLSI design! 🚀         ║
-║                                                        ║
-╚════════════════════════════════════════════════════════╝
+
 ```
 
 **Lab Data Summary**
