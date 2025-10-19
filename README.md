@@ -132,7 +132,7 @@ cd ~/sky130CircuitDesignWorkshop/design/
 #### SPICE Netlist Structure
 
 <p align="center">
-  <img src="day2_spice_idvds.png" alt="SPICE Netlist for Id-Vds" width="85%">
+  <img src="day2_1.png" alt="SPICE Netlist for Id-Vds" width="85%">
 </p>
 
 ```spice
@@ -236,7 +236,7 @@ The `-vdd#branch` command plots the current through the Vdd voltage source, whic
 ### Simulation Results
 
 <p align="center">
-  <img src="day2_plot_idvds.png" alt="Id vs Vds Characteristics" width="90%">
+  <img src="day2_3.png" alt="Id vs Vds Characteristics" width="90%">
 </p>
 
 #### Graphical Analysis
@@ -318,7 +318,7 @@ Generate **transfer characteristics** by sweeping gate-source voltage (Vgs) from
 #### File: `day2_nfet_idvgs_L015_W039.spice`
 
 <p align="center">
-  <img src="day2_spice_idvgs.png" alt="SPICE Netlist for Id-Vgs" width="85%">
+  <img src="day2_4.png" alt="SPICE Netlist for Id-Vgs" width="85%">
 </p>
 
 ```spice
@@ -389,7 +389,7 @@ ngspice 1 -> plot -vdd#branch
 ### Simulation Results
 
 <p align="center">
-  <img src="day2_plot_idvgs.png" alt="Id vs Vgs Characteristics" width="90%">
+  <img src="day2_5.png" alt="Id vs Vgs Characteristics" width="90%">
 </p>
 
 #### Graphical Analysis
@@ -528,13 +528,6 @@ For shorter L:
 Impact: Lower output resistance in saturation
         → Worse current source performance
         → Reduced analog gain
-```
-
-#### 4. **Threshold Voltage Roll-Off**
-
-<p align="center">
-  <img src="vth_rolloff_concept.png" alt="Vth Roll-off Illustration" width="70%">
-</p>
 
 ```
 Vth vs Channel Length:
